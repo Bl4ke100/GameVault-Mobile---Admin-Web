@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-900 text-white flex h-screen font-sans hidden" id="bodyContent">
+
+    <aside class="w-64 bg-gray-800 flex flex-col border-r border-gray-700">
+        <div class="p-6 text-2xl font-bold text-blue-500 tracking-tighter">
+            GAMEVAULT <span class="text-xs text-gray-400">ADMIN</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-2">
+            <a href="dashboard.html" class="flex items-center p-3 bg-blue-600 rounded-lg"><i
+                    class="fas fa-home w-6"></i> Dashboard</a>
+            <a href="games.html"
+                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
+                    class="fas fa-gamepad w-6"></i> Games</a>
+            <a href="#"
+                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
+                    class="fas fa-users w-6"></i> Users</a>
+            <a href="#"
+                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
+                    class="fas fa-shopping-cart w-6"></i> Orders</a>
+        </nav>
+        <div class="p-4 border-t border-gray-700">
+            <button id="btnLogout"
+                class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"><i
+                    class="fas fa-sign-out-alt w-6"></i> Logout</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-8">
+            <h2 class="text-xl font-semibold">Overview</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-400" id="adminNameDisplay">Welcome, Admin</span>
+                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold">A</div>
+            </div>
+        </header>
+
+        <section class="p-8 overflow-y-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <p class="text-gray-400 text-sm">Total Users</p>
+                    <h3 class="text-3xl font-bold mt-1" id="statUsers">...</h3>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <p class="text-gray-400 text-sm">Games in Store</p>
+                    <h3 class="text-3xl font-bold mt-1 text-blue-400" id="statGames">...</h3>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <p class="text-gray-400 text-sm">Total Revenue (LKR)</p>
+                    <h3 class="text-3xl font-bold mt-1 text-green-400" id="statRevenue">0.00</h3>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 1. PASTE YOUR CONFIG HERE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfgmqKJHdj3udZiK9ubTuJWGqj9JWIYPI",
+            authDomain: "gamevault-ffe65.firebaseapp.com",
+            projectId: "gamevault-ffe65",
+            storageBucket: "gamevault-ffe65.firebasestorage.app",
+            messagingSenderId: "152244395979",
+            appId: "1:152244395979:web:f81081c09c6d9aa41b204e",
+            measurementId: "G-KXPXH90XKF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 2. Auth Guard: Check if logged in
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in, reveal the page
+                document.getElementById('bodyContent').classList.remove('hidden');
+                loadDashboardStats();
+            } else {
+                // No user is signed in, kick to login
+                window.location.href = "index.html";
+            }
+        });
+
+        // 3. Logout functionality
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            });
+        });
+
+        // 4. Fetch Quick Stats using getCountFromServer (saves read quotas!)
+        async function loadDashboardStats() {
+            try {
+                // Get Users Count
+                const usersColl = collection(db, 'users');
+                const usersSnapshot = await getCountFromServer(usersColl);
+                document.getElementById('statUsers').innerText = usersSnapshot.data().count;
+
+                // Get Games Count
+                const gamesColl = collection(db, 'games');
+                const gamesSnapshot = await getCountFromServer(gamesColl);
+                document.getElementById('statGames').innerText = gamesSnapshot.data().count;
+
+                // Revenue requires summing up order totals, we can tackle that in the Reports phase!
+            } catch (error) {
+                console.error("Error fetching stats: ", error);
+            }
+        }
+    </script>
+</body>
+
+</html>

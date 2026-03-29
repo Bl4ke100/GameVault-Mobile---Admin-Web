@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault | Manage Games</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-900 text-white flex h-screen font-sans hidden" id="bodyContent">
+
+    <aside class="w-64 bg-gray-800 flex flex-col border-r border-gray-700 z-10">
+        <div class="p-6 text-2xl font-bold text-blue-500 tracking-tighter">
+            GAMEVAULT <span class="text-xs text-gray-400">ADMIN</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-2">
+            <a href="dashboard.html"
+                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
+                    class="fas fa-home w-6"></i> Dashboard</a>
+            <a href="games.html" class="flex items-center p-3 bg-blue-600 rounded-lg text-white"><i
+                    class="fas fa-gamepad w-6"></i> Games</a>
+            <a href="#"
+                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
+                    class="fas fa-users w-6"></i> Users</a>
+            <a href="#"
+                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
+                    class="fas fa-shopping-cart w-6"></i> Orders</a>
+        </nav>
+        <div class="p-4 border-t border-gray-700">
+            <button id="btnLogout"
+                class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"><i
+                    class="fas fa-sign-out-alt w-6"></i> Logout</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        <header class="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-8">
+            <h2 class="text-xl font-semibold">Game Management</h2>
+            <button id="openModalBtn"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition text-sm">
+                <i class="fas fa-plus mr-2"></i> Add New Game
+            </button>
+        </header>
+
+        <section class="p-8 overflow-y-auto flex-1">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="relative w-full md:w-[400px]">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="searchInput" placeholder="Search games by title..." class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-11 pr-4 py-3 focus:border-blue-500 text-white text-sm outline-none transition shadow-sm">
+                </div>
+                <div class="flex items-center space-x-3 w-full md:w-auto">
+                    <span class="text-gray-400 font-semibold uppercase tracking-wider text-xs whitespace-nowrap">Sort By:</span>
+                    <select id="sortSelect" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:border-blue-500 text-white outline-none transition appearance-none pr-8 relative cursor-pointer text-sm shadow-sm w-full md:w-48">
+                        <option value="titleAsc">Title (A - Z)</option>
+                        <option value="titleDesc">Title (Z - A)</option>
+                        <option value="priceAsc">Price (Low to High)</option>
+                        <option value="priceDesc">Price (High to Low)</option>
+                        <option value="stockAsc">Stock (Lowest First)</option>
+                        <option value="stockDesc">Stock (Highest First)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-700 text-gray-400 text-sm uppercase tracking-wider">
+                            <th class="p-4 font-medium">Title</th>
+                            <th class="p-4 font-medium">Price (LKR)</th>
+                            <th class="p-4 font-medium">Stock</th>
+                            <th class="p-4 font-medium text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gamesTableBody" class="divide-y divide-gray-700">
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-gray-500 italic">Loading games...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="addGameModal"
+        class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden backdrop-blur-sm transition-opacity overflow-y-auto py-10">
+        <div class="bg-gray-800 rounded-2xl border border-gray-700 w-full max-w-4xl p-6 shadow-2xl relative my-auto">
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i
+                    class="fas fa-times text-xl"></i></button>
+
+            <h3 id="modalTitle" class="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">Add New Game</h3>
+
+            <form id="addGameForm" class="space-y-4">
+                <input type="hidden" id="editRealDocId" value="">
+                <input type="hidden" id="editCustomGameId" value="">
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="col-span-3 md:col-span-2">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Game Title</label>
+                        <input type="text" id="gameTitle" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-blue-500 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Release Year</label>
+                        <input type="number" id="gameYear" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-blue-500 text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Price (LKR)</label>
+                        <input type="number" id="gamePrice" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-blue-500 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Stock Quantity</label>
+                        <input type="number" id="gameStock" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-blue-500 text-white">
+                    </div>
+                    <div class="col-span-3">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Available Platforms</label>
+                        <div class="flex flex-wrap gap-3" id="gamePlatformsContainer">
+                            <label class="flex items-center space-x-2 bg-gray-900 border border-gray-700 px-3 py-2 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                                <input type="checkbox" value="PC" class="platform-checkbox w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded">
+                                <span class="text-sm text-gray-300">PC</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-900 border border-gray-700 px-3 py-2 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                                <input type="checkbox" value="PS4" class="platform-checkbox w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded">
+                                <span class="text-sm text-gray-300">PS4</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-900 border border-gray-700 px-3 py-2 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                                <input type="checkbox" value="PS5" class="platform-checkbox w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded">
+                                <span class="text-sm text-gray-300">PS5</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-900 border border-gray-700 px-3 py-2 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                                <input type="checkbox" value="Xbox One" class="platform-checkbox w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded">
+                                <span class="text-sm text-gray-300">Xbox One</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-900 border border-gray-700 px-3 py-2 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                                <input type="checkbox" value="Xbox Series X/S" class="platform-checkbox w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded">
+                                <span class="text-sm text-gray-300">Xbox Series X/S</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-900 border border-gray-700 px-3 py-2 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                                <input type="checkbox" value="Nintendo Switch" class="platform-checkbox w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded">
+                                <span class="text-sm text-gray-300">Switch</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Category</label>
+                        <select id="catId" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-blue-500 text-white appearance-none">
+                            <option value="" disabled selected>Loading...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Developer</label>
+                        <select id="devId" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-blue-500 text-white appearance-none">
+                            <option value="" disabled selected>Loading...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Publisher</label>
+                        <select id="pubId" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-blue-500 text-white appearance-none">
+                            <option value="" disabled selected>Loading...</option>
+                        </select>
+                    </div>
+
+                    <div class="col-span-3">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Description</label>
+                        <textarea id="gameDesc" rows="3" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-blue-500 text-white"></textarea>
+                    </div>
+
+                    <div class="col-span-3 md:col-span-1 border border-gray-700 rounded-lg p-3 bg-gray-900/50">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Main Poster <span
+                                class="text-gray-600">(Optional on edit)</span></label>
+                        <input type="file" id="posterFile" accept="image/png, image/jpeg"
+                            class="w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    </div>
+                    <div class="col-span-3 md:col-span-2 border border-gray-700 rounded-lg p-3 bg-gray-900/50">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Gallery Images <span
+                                class="text-gray-600">(Optional on edit)</span></label>
+                        <input type="file" id="galleryFiles" accept="image/png, image/jpeg" multiple
+                            class="w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-gray-700 file:text-white hover:file:bg-gray-600">
+
+                        <div id="galleryPreview" class="mt-3 space-y-1"></div>
+                    </div>
+                </div>
+
+                <div id="uploadStatus" class="text-sm text-blue-400 hidden mt-2"><i
+                        class="fas fa-spinner fa-spin mr-2"></i>Processing...</div>
+
+                <div class="flex justify-end pt-4 border-t border-gray-700 mt-6">
+                    <button type="button" id="cancelBtn"
+                        class="px-6 py-2 rounded-lg text-gray-400 hover:text-white mr-3">Cancel</button>
+                    <button type="submit" id="saveGameBtn"
+                        class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-bold text-white transition">Save
+                        Game</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfgmqKJHdj3udZiK9ubTuJWGqj9JWIYPI",
+            authDomain: "gamevault-ffe65.firebaseapp.com",
+            projectId: "gamevault-ffe65",
+            storageBucket: "gamevault-ffe65.firebasestorage.app",
+            messagingSenderId: "152244395979",
+            appId: "1:152244395979:web:f81081c09c6d9aa41b204e",
+            measurementId: "G-KXPXH90XKF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        let currentGamesList = [];
+        let selectedGalleryFiles = []; // Our custom array for image sorting
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('bodyContent').classList.remove('hidden');
+                loadGames();
+                loadDropdowns();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.href = "index.html");
+        });
+
+        // --- DROPDOWN LOGIC ---
+        async function loadDropdowns() {
+            try {
+                const catSelect = document.getElementById('catId');
+                const catSnapshot = await getDocs(collection(db, "categories"));
+                catSelect.innerHTML = '<option value="" disabled selected>Select a Category</option>';
+                catSnapshot.forEach(doc => catSelect.innerHTML += `<option value="${doc.data().catId}">${doc.data().name}</option>`);
+
+                const devSelect = document.getElementById('devId');
+                const devSnapshot = await getDocs(collection(db, "developers"));
+                devSelect.innerHTML = '<option value="" disabled selected>Select a Developer</option>';
+                devSnapshot.forEach(doc => devSelect.innerHTML += `<option value="${doc.data().developerId}">${doc.data().name}</option>`);
+
+                const pubSelect = document.getElementById('pubId');
+                const pubSnapshot = await getDocs(collection(db, "publishers"));
+                pubSelect.innerHTML = '<option value="" disabled selected>Select a Publisher</option>';
+                pubSnapshot.forEach(doc => pubSelect.innerHTML += `<option value="${doc.data().publisherId}">${doc.data().name}</option>`);
+            } catch (error) { console.error("Error loading dropdowns:", error); }
+        }
+
+        // --- MODAL TOGGLES ---
+        const modal = document.getElementById('addGameModal');
+        const form = document.getElementById('addGameForm');
+        const previewDiv = document.getElementById('galleryPreview');
+
+        document.getElementById('openModalBtn').addEventListener('click', () => {
+            form.reset();
+            selectedGalleryFiles = [];
+            previewDiv.innerHTML = '';
+            document.getElementById('editRealDocId').value = "";
+            document.getElementById('editCustomGameId').value = "";
+            document.getElementById('modalTitle').innerText = "Add New Game";
+            document.getElementById('saveGameBtn').innerText = "Save Game";
+            document.getElementById('posterFile').required = true;
+            modal.classList.remove('hidden');
+        });
+
+        document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.add('hidden'));
+        document.getElementById('cancelBtn').addEventListener('click', () => modal.classList.add('hidden'));
+
+        // --- LOAD GAMES & BIND EDIT BUTTONS ---
+        async function loadGames() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "games"));
+                currentGamesList = [];
+
+                querySnapshot.forEach((doc) => {
+                    const game = doc.data();
+                    game.realDocId = doc.id;
+                    currentGamesList.push(game);
+                });
+                applyFiltersAndSort();
+            } catch (error) { console.error("Error fetching games: ", error); }
+        }
+
+        // --- SEARCH & SORT LOGIC ---
+        document.getElementById('searchInput').addEventListener('input', applyFiltersAndSort);
+        document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSort);
+
+        function applyFiltersAndSort() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sortMode = document.getElementById('sortSelect').value;
+
+            // 1. Filter
+            let result = currentGamesList.filter(game => {
+                const title = (game.title || '').toLowerCase();
+                return title.includes(searchTerm);
+            });
+
+            // 2. Sort
+            result.sort((a, b) => {
+                const titleA = (a.title || '').toLowerCase();
+                const titleB = (b.title || '').toLowerCase();
+                const priceA = a.price || 0;
+                const priceB = b.price || 0;
+                const stockA = a.stock || 0;
+                const stockB = b.stock || 0;
+
+                switch (sortMode) {
+                    case 'titleAsc': return titleA.localeCompare(titleB);
+                    case 'titleDesc': return titleB.localeCompare(titleA);
+                    case 'priceAsc': return priceA - priceB;
+                    case 'priceDesc': return priceB - priceA;
+                    case 'stockAsc': return stockA - stockB;
+                    case 'stockDesc': return stockB - stockA;
+                    default: return 0;
+                }
+            });
+
+            // 3. Render
+            renderGamesTable(result);
+        }
+
+        function renderGamesTable(gamesArray) {
+            const tableBody = document.getElementById('gamesTableBody');
+            tableBody.innerHTML = '';
+
+            if (gamesArray.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-500">No games found.</td></tr>`;
+                return;
+            }
+
+            gamesArray.forEach((game) => {
+                const stockClass = game.stock < 5 ? "text-red-400 font-bold" : "text-gray-300";
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-700/50 transition border-b border-gray-700/50";
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-white">${game.title || 'Untitled'}</td>
+                    <td class="p-3 text-gray-300">${game.price ? game.price + '.00' : '0.00'}</td>
+                    <td class="p-3 ${stockClass}">${game.stock || 0}</td>
+                    <td class="p-3 text-right space-x-3">
+                        <button type="button" class="edit-btn text-blue-400 hover:text-blue-300 transition" data-id="${game.realDocId}"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="text-red-400 hover:text-red-300 transition"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Event Delegation for Edit Buttons
+        // --- TABLE ACTIONS (Edit & Delete) ---
+        document.getElementById('gamesTableBody').addEventListener('click', async (e) => {
+            const editBtn = e.target.closest('.edit-btn');
+            const deleteBtn = e.target.closest('.text-red-400'); // Targeted the trash button class
+
+            // HANDLE EDIT
+            if (editBtn) {
+                const realId = editBtn.getAttribute('data-id');
+                const gameToEdit = currentGamesList.find(g => g.realDocId === realId);
+                if (gameToEdit) openEditModal(gameToEdit);
+            }
+
+            // HANDLE DELETE
+            if (deleteBtn) {
+                const tr = deleteBtn.closest('tr');
+                const gameTitle = tr.querySelector('td:nth-child(2)').innerText;
+                const realId = deleteBtn.previousElementSibling.getAttribute('data-id'); // Gets ID from edit btn
+
+                // 1. Simple Confirmation
+                const confirmed = confirm(`Are you sure you want to delete "${gameTitle}"?\nThis cannot be undone.`);
+
+                if (confirmed) {
+                    try {
+                        // 2. Remove from Firestore
+                        await deleteDoc(doc(db, "games", realId));
+
+                        // 3. UI Feedback
+                        tr.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                        setTimeout(() => {
+                            loadGames(); // Refresh table
+                            alert("Game deleted successfully.");
+                        }, 500);
+
+                    } catch (error) {
+                        console.error("Error deleting game:", error);
+                        alert("Failed to delete game: " + error.message);
+                    }
+                }
+            }
+        });
+
+        // --- POPULATE THE MODAL FOR EDITING ---
+        function openEditModal(game) {
+            form.reset();
+            selectedGalleryFiles = [];
+            previewDiv.innerHTML = '';
+
+            document.getElementById('modalTitle').innerText = "Edit Game Details";
+            document.getElementById('saveGameBtn').innerText = "Update Game";
+            document.getElementById('posterFile').required = false;
+
+            // SET BOTH IDs
+            document.getElementById('editRealDocId').value = game.realDocId;
+            document.getElementById('editCustomGameId').value = game.gameId || "";
+
+            document.getElementById('gameTitle').value = game.title;
+            document.getElementById('gamePrice').value = game.price;
+            document.getElementById('gameStock').value = game.stock;
+            document.getElementById('gameYear').value = game.releasedYear;
+            document.getElementById('gameDesc').value = game.description;
+            document.getElementById('catId').value = game.categoryId;
+            document.getElementById('devId').value = game.developerId;
+            document.getElementById('pubId').value = game.publisherId;
+
+            if (game.attributes && game.attributes.length > 0) {
+                const platforms = game.attributes[0].values || [];
+                platforms.forEach(platform => {
+                    const cb = document.querySelector(`.platform-checkbox[value="${platform}"]`);
+                    if (cb) cb.checked = true;
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        // --- CUSTOM GALLERY SORTING LOGIC ---
+        const galleryInput = document.getElementById('galleryFiles');
+
+        galleryInput.addEventListener('change', function (e) {
+            selectedGalleryFiles = Array.from(this.files);
+            renderGalleryPreview();
+        });
+
+        function renderGalleryPreview() {
+            previewDiv.innerHTML = '';
+            selectedGalleryFiles.forEach((file, index) => {
+                const newName = `image${index + 1}.png`;
+                const imgUrl = URL.createObjectURL(file);
+
+                const row = document.createElement('div');
+                row.className = "text-[11px] text-gray-400 flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700 mt-2";
+
+                row.innerHTML = `
+                    <div class="flex items-center overflow-hidden flex-1">
+                        <img src="${imgUrl}" class="h-10 w-16 object-cover rounded mr-3 shadow-sm border border-gray-600 shrink-0">
+                        <span class="truncate" title="${file.name}">
+                            <b class="text-white">${newName}</b> <br>
+                            <span class="text-[10px] text-gray-500">(was ${file.name})</span>
+                        </span>
+                    </div>
+                    <div class="flex space-x-1 ml-4 shrink-0">
+                        <button type="button" class="hover:text-white px-2 py-2 bg-gray-700 rounded transition ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}" data-action="up" data-index="${index}">
+                            <i class="fas fa-arrow-up pointer-events-none"></i>
+                        </button>
+                        <button type="button" class="hover:text-white px-2 py-2 bg-gray-700 rounded transition ${index === selectedGalleryFiles.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}" data-action="down" data-index="${index}">
+                            <i class="fas fa-arrow-down pointer-events-none"></i>
+                        </button>
+                        <button type="button" class="text-red-400 hover:text-red-300 px-2 py-2 bg-gray-700 rounded transition" data-action="remove" data-index="${index}">
+                            <i class="fas fa-times pointer-events-none"></i>
+                        </button>
+                    </div>
+                `;
+                previewDiv.appendChild(row);
+            });
+        }
+
+        previewDiv.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-action');
+            const index = parseInt(btn.getAttribute('data-index'));
+
+            if (action === 'up' && index > 0) {
+                [selectedGalleryFiles[index - 1], selectedGalleryFiles[index]] = [selectedGalleryFiles[index], selectedGalleryFiles[index - 1]];
+            } else if (action === 'down' && index < selectedGalleryFiles.length - 1) {
+                [selectedGalleryFiles[index + 1], selectedGalleryFiles[index]] = [selectedGalleryFiles[index], selectedGalleryFiles[index + 1]];
+            } else if (action === 'remove') {
+                selectedGalleryFiles.splice(index, 1);
+                galleryInput.value = '';
+            }
+            renderGalleryPreview();
+        });
+
+        // --- FORM SUBMIT (Handles BOTH Add and Edit) ---
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const saveBtn = document.getElementById('saveGameBtn');
+            const statusText = document.getElementById('uploadStatus');
+            saveBtn.disabled = true;
+            statusText.classList.remove('hidden');
+
+            try {
+                const realDocId = document.getElementById('editRealDocId').value;
+                const customGameId = document.getElementById('editCustomGameId').value;
+                const isEditing = realDocId !== "";
+
+                // THE FIX: Use custom ID for folders, but Real ID for the database!
+                const documentIdToSave = isEditing ? realDocId : doc(collection(db, "games")).id;
+                const storageFolderId = isEditing ? customGameId : documentIdToSave;
+
+                // 1. Upload Images
+                const posterFile = document.getElementById('posterFile').files[0];
+                if (posterFile) {
+                    const posterRef = ref(storage, `images/game-images/${storageFolderId}/poster.png`);
+                    await uploadBytes(posterRef, posterFile);
+                }
+
+                let imageNamesArray = [];
+                if (selectedGalleryFiles.length > 0) {
+                    for (let i = 0; i < selectedGalleryFiles.length; i++) {
+                        const fileName = `image${i + 1}.png`;
+                        const galleryRef = ref(storage, `images/game-images/${storageFolderId}/${fileName}`);
+                        await uploadBytes(galleryRef, selectedGalleryFiles[i]);
+                        imageNamesArray.push(fileName);
+                    }
+                }
+
+                // 2. Parse Platforms
+                const checkedBoxes = document.querySelectorAll('.platform-checkbox:checked');
+                const selectedPlatforms = Array.from(checkedBoxes).map(cb => cb.value);
+
+                const attributesObj = [{
+                    name: "Platform",
+                    type: "text",
+                    values: selectedPlatforms
+                }];
+
+                // 3. Build the Database Object
+                const gameData = {
+                    title: document.getElementById('gameTitle').value,
+                    price: parseFloat(document.getElementById('gamePrice').value),
+                    stock: parseInt(document.getElementById('gameStock').value),
+                    description: document.getElementById('gameDesc').value,
+                    categoryId: document.getElementById('catId').value,
+                    developerId: document.getElementById('devId').value,
+                    publisherId: document.getElementById('pubId').value,
+                    releasedYear: parseInt(document.getElementById('gameYear').value),
+                    attributes: attributesObj
+                };
+
+                if (!isEditing) {
+                    gameData.gameId = storageFolderId;
+                    gameData.rating = 0;
+                    gameData.status = true;
+                    gameData.posterUrl = "poster.png";
+                    gameData.images = imageNamesArray;
+                } else {
+                    if (posterFile) gameData.posterUrl = "poster.png";
+                    if (selectedGalleryFiles.length > 0) gameData.images = imageNamesArray;
+                }
+
+                // 4. Save to Firestore
+                if (isEditing) {
+                    await updateDoc(doc(db, "games", documentIdToSave), gameData);
+                } else {
+                    await setDoc(doc(db, "games", documentIdToSave), gameData);
+                }
+
+                form.reset();
+                modal.classList.add('hidden');
+                loadGames();
+
+            } catch (error) {
+                console.error("Error saving game:", error);
+                alert("Failed to save game: " + error.message);
+            } finally {
+                saveBtn.disabled = false;
+                statusText.classList.add('hidden');
+            }
+        });
+
+
+    </script>
+</body>
+
+</html>
