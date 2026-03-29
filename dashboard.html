@@ -4,60 +4,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameVault | Dashboard</title>
+    <title>GameVault | Dashboard Overview</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3a3a;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .stat-card {
+            background: #111111;
+            border: 1px solid #1f1f1f;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: #333333;
+            transform: translateY(-2px);
+        }
+
+        .nav-link {
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .nav-link:hover {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .nav-link.active {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .nav-link.active i {
+            color: #000000;
+        }
+
+        .section-card {
+            background: #111111;
+            border: 1px solid #1f1f1f;
+        }
+
+        .quick-action {
+            background: #0a0a0a;
+            border: 1px solid #1f1f1f;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .quick-action:hover {
+            background: #1a1a1a;
+            border-color: #333333;
+        }
+
+        .badge-completed {
+            color: #ffffff;
+            background: #1a1a1a;
+            border: 1px solid #333;
+        }
+
+        .badge-pending {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .badge-shipped {
+            color: #ffffff;
+            background: #1f1f1f;
+        }
+
+        .badge-cancelled {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+    </style>
 </head>
 
-<body class="bg-gray-900 text-white flex h-screen font-sans hidden" id="bodyContent">
+<body class="bg-black text-white flex h-screen hidden" id="bodyContent">
 
-    <aside class="w-64 bg-gray-800 flex flex-col border-r border-gray-700">
-        <div class="p-6 text-2xl font-bold text-blue-500 tracking-tighter">
-            GAMEVAULT <span class="text-xs text-gray-400">ADMIN</span>
+    <!-- SIDEBAR -->
+    <aside class="w-60 bg-[#0a0a0a] flex flex-col border-r border-[#1f1f1f] shrink-0">
+
+        <!-- Logo -->
+        <div class="px-6 py-6 border-b border-[#1f1f1f]">
+            <div class="text-xl font-black tracking-tighter text-white">GAME<span
+                    class="text-white opacity-40">VAULT</span></div>
+            <div class="text-[10px] text-[#444] tracking-widest uppercase mt-0.5">Admin Console</div>
         </div>
-        <nav class="flex-1 px-4 space-y-2">
-            <a href="dashboard.html" class="flex items-center p-3 bg-blue-600 rounded-lg"><i
-                    class="fas fa-home w-6"></i> Dashboard</a>
-            <a href="games.html"
-                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
-                    class="fas fa-gamepad w-6"></i> Games</a>
-            <a href="#"
-                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
-                    class="fas fa-users w-6"></i> Users</a>
-            <a href="#"
-                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition"><i
-                    class="fas fa-shopping-cart w-6"></i> Orders</a>
+
+        <!-- Nav -->
+        <nav class="flex-1 px-3 py-4 space-y-1">
+            <a href="dashboard.html" class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm">
+                <i class="fas fa-home w-4 text-center"></i> Dashboard
+            </a>
+            <a href="games.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#888]">
+                <i class="fas fa-gamepad w-4 text-center"></i> Games
+            </a>
+            <a href="users.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#888]">
+                <i class="fas fa-users w-4 text-center"></i> Users
+            </a>
+            <a href="orders.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#888]">
+                <i class="fas fa-shopping-cart w-4 text-center"></i> Orders
+            </a>
+            <a href="reports.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#888]">
+                <i class="fas fa-chart-bar w-4 text-center"></i> Reports & Comms
+            </a>
+            <a href="banners.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#888]">
+                <i class="fas fa-images w-4 text-center"></i> Banners Hub
+            </a>
         </nav>
-        <div class="p-4 border-t border-gray-700">
+
+        <!-- Logout -->
+        <div class="p-3 border-t border-[#1f1f1f]">
             <button id="btnLogout"
-                class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"><i
-                    class="fas fa-sign-out-alt w-6"></i> Logout</button>
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-500/10 transition">
+                <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
+            </button>
         </div>
+
     </aside>
 
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-8">
-            <h2 class="text-xl font-semibold">Overview</h2>
-            <div class="flex items-center space-x-4">
-                <span class="text-sm text-gray-400" id="adminNameDisplay">Welcome, Admin</span>
-                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold">A</div>
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-hidden bg-[#0d0d0d]">
+
+        <!-- Header -->
+        <header class="h-14 bg-[#0a0a0a] border-b border-[#1f1f1f] flex items-center justify-between px-8 shrink-0">
+            <h2 class="text-sm font-bold tracking-widest uppercase text-[#888]">Business Overview</h2>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-[#444]">Admin Session Live</span>
+                <div
+                    class="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center relative">
+                    <span class="absolute top-0 right-0 w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+                    <i class="fas fa-bolt text-white text-[10px]"></i>
+                </div>
             </div>
         </header>
 
-        <section class="p-8 overflow-y-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <p class="text-gray-400 text-sm">Total Users</p>
-                    <h3 class="text-3xl font-bold mt-1" id="statUsers">...</h3>
+        <!-- Scrollable Content -->
+        <section class="p-6 overflow-y-auto flex-1">
+
+            <!-- Loading -->
+            <div id="loadingOverlay" class="w-full h-32 flex flex-col items-center justify-center text-[#555]">
+                <i class="fas fa-circle-notch fa-spin text-2xl mb-3"></i>
+                <p class="text-xs font-semibold tracking-widest uppercase">Aggregating live data...</p>
+            </div>
+
+            <div id="dashboardContent" class="hidden">
+
+                <!-- STAT CARDS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+                    <!-- Revenue -->
+                    <div class="stat-card p-5 rounded-xl relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 text-white/[0.03]"><i class="fas fa-wallet text-8xl"></i>
+                        </div>
+                        <p class="text-[#555] text-[10px] font-bold uppercase tracking-widest mb-3">Total Revenue</p>
+                        <h3 class="text-2xl font-black text-white">Rs <span id="statRevenue">0.00</span></h3>
+                    </div>
+
+                    <!-- Pending -->
+                    <div
+                        class="stat-card p-5 rounded-xl relative overflow-hidden border-amber-500/20 hover:border-amber-500/40">
+                        <div class="absolute -right-4 -top-4 text-amber-500/5"><i class="fas fa-clock text-8xl"></i>
+                        </div>
+                        <p class="text-amber-500/70 text-[10px] font-bold uppercase tracking-widest mb-3">Pending Orders
+                        </p>
+                        <h3 class="text-2xl font-black text-amber-400" id="statPending">0</h3>
+                    </div>
+
+                    <!-- Games -->
+                    <div class="stat-card p-5 rounded-xl relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 text-white/[0.03]"><i class="fas fa-gamepad text-8xl"></i>
+                        </div>
+                        <p class="text-[#555] text-[10px] font-bold uppercase tracking-widest mb-3">Active Titles</p>
+                        <h3 class="text-2xl font-black text-white" id="statGames">0</h3>
+                    </div>
+
+                    <!-- Users -->
+                    <div class="stat-card p-5 rounded-xl relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 text-white/[0.03]"><i class="fas fa-users text-8xl"></i>
+                        </div>
+                        <p class="text-[#555] text-[10px] font-bold uppercase tracking-widest mb-3">Registered Users</p>
+                        <h3 class="text-2xl font-black text-white" id="statUsers">0</h3>
+                    </div>
+
                 </div>
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <p class="text-gray-400 text-sm">Games in Store</p>
-                    <h3 class="text-3xl font-bold mt-1 text-blue-400" id="statGames">...</h3>
+
+                <!-- CHARTS ROW -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+
+                    <!-- Line Chart -->
+                    <div class="lg:col-span-2 section-card rounded-xl p-5">
+                        <div class="flex justify-between items-center mb-5">
+                            <h3 class="text-sm font-bold text-white tracking-wide">Revenue Over Time</h3>
+                            <span class="text-[10px] text-[#555] uppercase tracking-widest">Daily</span>
+                        </div>
+                        <div class="w-full h-56">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Doughnut Chart -->
+                    <div class="section-card rounded-xl p-5 flex flex-col">
+                        <h3 class="text-sm font-bold text-white tracking-wide mb-5">Order Status</h3>
+                        <div class="flex-1 flex justify-center items-center min-h-[200px]">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <p class="text-gray-400 text-sm">Total Revenue (LKR)</p>
-                    <h3 class="text-3xl font-bold mt-1 text-green-400" id="statRevenue">0.00</h3>
+
+                <!-- BOTTOM ROW -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+                    <!-- Recent Transactions -->
+                    <div class="lg:col-span-2 section-card rounded-xl flex flex-col">
+                        <div class="px-5 py-4 border-b border-[#1f1f1f] flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-white">Recent Transactions</h3>
+                            <a href="orders.html"
+                                class="text-[10px] font-bold text-[#555] hover:text-white uppercase tracking-widest transition">
+                                View All <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                        <div class="flex-1 overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr
+                                        class="text-[#444] text-[9px] uppercase tracking-widest border-b border-[#1a1a1a]">
+                                        <th class="px-5 py-3 font-semibold">Customer</th>
+                                        <th class="px-5 py-3 font-semibold">Date</th>
+                                        <th class="px-5 py-3 font-semibold">Amount</th>
+                                        <th class="px-5 py-3 font-semibold text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrdersBody" class="divide-y divide-[#151515] text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="section-card rounded-xl p-5 flex flex-col">
+                        <h3 class="text-sm font-bold text-white mb-4">Quick Actions</h3>
+                        <div class="space-y-3 flex-1">
+
+                            <a href="games.html"
+                                class="quick-action flex items-center justify-between p-4 rounded-xl group">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/60 group-hover:text-white transition">
+                                        <i class="fas fa-plus text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-[#bbb] group-hover:text-white transition">Add
+                                            New Game</h4>
+                                        <p class="text-[10px] text-[#444] mt-0.5">Update store catalog</p>
+                                    </div>
+                                </div>
+                                <i
+                                    class="fas fa-chevron-right text-[#333] group-hover:text-white text-xs transition"></i>
+                            </a>
+
+                            <a href="orders.html"
+                                class="quick-action flex items-center justify-between p-4 rounded-xl group">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500/60 group-hover:text-amber-400 transition">
+                                        <i class="fas fa-box-open text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-[#bbb] group-hover:text-white transition">
+                                            Fulfill Orders</h4>
+                                        <p class="text-[10px] text-[#444] mt-0.5">Review pending requests</p>
+                                    </div>
+                                </div>
+                                <i
+                                    class="fas fa-chevron-right text-[#333] group-hover:text-white text-xs transition"></i>
+                            </a>
+
+                            <a href="users.html"
+                                class="quick-action flex items-center justify-between p-4 rounded-xl group">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/60 group-hover:text-white transition">
+                                        <i class="fas fa-search text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-[#bbb] group-hover:text-white transition">
+                                            Investigate User</h4>
+                                        <p class="text-[10px] text-[#444] mt-0.5">Lookup customer profiles</p>
+                                    </div>
+                                </div>
+                                <i
+                                    class="fas fa-chevron-right text-[#333] group-hover:text-white text-xs transition"></i>
+                            </a>
+
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
         </section>
     </main>
@@ -65,9 +331,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 1. PASTE YOUR CONFIG HERE
+        Chart.defaults.color = '#555555';
+        Chart.defaults.font.family = 'Inter, sans-serif';
+
         const firebaseConfig = {
             apiKey: "AIzaSyDfgmqKJHdj3udZiK9ubTuJWGqj9JWIYPI",
             authDomain: "gamevault-ffe65.firebaseapp.com",
@@ -82,41 +350,171 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 2. Auth Guard: Check if logged in
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // User is signed in, reveal the page
                 document.getElementById('bodyContent').classList.remove('hidden');
-                loadDashboardStats();
+                initDashboard();
             } else {
-                // No user is signed in, kick to login
                 window.location.href = "index.html";
             }
         });
 
-        // 3. Logout functionality
         document.getElementById('btnLogout').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            });
+            signOut(auth).then(() => window.location.href = "index.html");
         });
 
-        // 4. Fetch Quick Stats using getCountFromServer (saves read quotas!)
-        async function loadDashboardStats() {
+        async function initDashboard() {
             try {
-                // Get Users Count
-                const usersColl = collection(db, 'users');
-                const usersSnapshot = await getCountFromServer(usersColl);
-                document.getElementById('statUsers').innerText = usersSnapshot.data().count;
+                const cUsers = await getCountFromServer(collection(db, 'users'));
+                document.getElementById('statUsers').innerText = cUsers.data().count;
 
-                // Get Games Count
-                const gamesColl = collection(db, 'games');
-                const gamesSnapshot = await getCountFromServer(gamesColl);
-                document.getElementById('statGames').innerText = gamesSnapshot.data().count;
+                const cGames = await getCountFromServer(collection(db, 'games'));
+                document.getElementById('statGames').innerText = cGames.data().count;
 
-                // Revenue requires summing up order totals, we can tackle that in the Reports phase!
-            } catch (error) {
-                console.error("Error fetching stats: ", error);
+                const ordersSnap = await getDocs(collection(db, 'orders'));
+                let totalIncome = 0;
+                let pendingOrders = 0;
+                let allOrders = [];
+                let statusCounts = { 'COMPLETED': 0, 'DELIVERED': 0, 'PENDING': 0, 'PROCESSING': 0, 'SHIPPED': 0, 'CANCELLED': 0, 'FAILED': 0 };
+                let revenueMap = {};
+
+                ordersSnap.forEach(d => {
+                    const data = d.data();
+                    allOrders.push(data);
+                    const status = (data.status || '').toUpperCase();
+                    if (statusCounts[status] !== undefined) statusCounts[status]++;
+                    else statusCounts[status] = 1;
+                    if (status === 'COMPLETED' || status === 'DELIVERED' || status === 'PAID') {
+                        totalIncome += (data.totalAmount || 0);
+                        if (data.orderDate) {
+                            const dt = new Date(data.orderDate);
+                            dt.setHours(0, 0, 0, 0);
+                            const dayEpoch = dt.getTime();
+                            revenueMap[dayEpoch] = (revenueMap[dayEpoch] || 0) + (data.totalAmount || 0);
+                        }
+                    }
+                    if (status === 'PENDING' || status === 'PROCESSING') pendingOrders++;
+                });
+
+                document.getElementById('statRevenue').innerText = totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                document.getElementById('statPending').innerText = pendingOrders;
+
+                // Revenue Line Chart
+                const sortedEpochs = Object.keys(revenueMap).sort((a, b) => a - b);
+                const chartLabels = sortedEpochs.map(ep => new Date(parseInt(ep)).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                const chartData = sortedEpochs.map(ep => revenueMap[ep]);
+
+                new Chart(document.getElementById('revenueChart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels.length ? chartLabels : ['No Data'],
+                        datasets: [{
+                            label: 'Daily Revenue (Rs)',
+                            data: chartData.length ? chartData : [0],
+                            borderColor: '#ffffff',
+                            backgroundColor: 'rgba(255,255,255,0.04)',
+                            borderWidth: 1.5,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#0d0d0d',
+                            pointHoverBackgroundColor: '#0d0d0d',
+                            pointHoverBorderColor: '#ffffff',
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255,255,255,0.04)' },
+                                ticks: { callback: value => 'Rs ' + value, color: '#555' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#555' }
+                            }
+                        }
+                    }
+                });
+
+                // Status Doughnut Chart
+                new Chart(document.getElementById('statusChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completed/Paid', 'Pending', 'Shipped', 'Cancelled'],
+                        datasets: [{
+                            data: [
+                                (statusCounts['COMPLETED'] || 0) + (statusCounts['DELIVERED'] || 0) + (statusCounts['PAID'] || 0),
+                                (statusCounts['PENDING'] || 0) + (statusCounts['PROCESSING'] || 0),
+                                (statusCounts['SHIPPED'] || 0),
+                                (statusCounts['CANCELLED'] || 0) + (statusCounts['FAILED'] || 0)
+                            ],
+                            backgroundColor: ['#ffffff', '#f59e0b', '#3a3a3a', '#ef4444'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, padding: 14, color: '#666', font: { size: 11 } }
+                            }
+                        },
+                        cutout: '78%'
+                    }
+                });
+
+                // Recent Orders Table
+                allOrders.sort((a, b) => (b.orderDate || 0) - (a.orderDate || 0));
+                const top5 = allOrders.slice(0, 5);
+                const tableBody = document.getElementById('recentOrdersBody');
+
+                if (top5.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="p-5 text-center text-[#444] italic text-sm">No transactions found.</td></tr>`;
+                } else {
+                    top5.forEach(o => {
+                        const name = o.billingAddress?.fullName || 'Anonymous';
+                        let dateText = "N/A";
+                        if (o.orderDate) {
+                            const d = new Date(o.orderDate);
+                            dateText = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                        const amt = "Rs " + (o.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+                        const stStr = (o.status || 'UNKNOWN').toUpperCase();
+
+                        let badgeClass = "text-[#888] bg-[#1a1a1a] border border-[#2a2a2a]";
+                        if (['COMPLETED', 'DELIVERED', 'PAID'].includes(stStr)) badgeClass = "text-white bg-white/10";
+                        if (['PENDING', 'PROCESSING'].includes(stStr)) badgeClass = "text-amber-400 bg-amber-400/10";
+                        if (stStr === 'SHIPPED') badgeClass = "text-[#aaa] bg-white/5";
+                        if (['CANCELLED', 'FAILED'].includes(stStr)) badgeClass = "text-red-400 bg-red-400/10";
+
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-white/[0.02] transition";
+                        tr.innerHTML = `
+                            <td class="px-5 py-3.5 font-semibold text-[#ccc] text-sm">${name}</td>
+                            <td class="px-5 py-3.5 text-[#555] text-xs">${dateText}</td>
+                            <td class="px-5 py-3.5 text-[#999] font-mono text-xs tracking-wide">${amt}</td>
+                            <td class="px-5 py-3.5 text-right">
+                                <span class="px-2 py-1 rounded text-[9px] font-bold tracking-widest ${badgeClass}">${stStr}</span>
+                            </td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                }
+
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Dashboard failed to initialize", err);
             }
         }
     </script>

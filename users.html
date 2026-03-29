@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault | Manage Users</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+    </style>
+</head>
+
+<body class="bg-[#0a0a0a] text-white flex h-screen font-sans hidden" id="bodyContent">
+
+    <aside class="w-64 bg-[#1a1a1a] flex flex-col border-r border-[#1f1f1f] z-10 shrink-0">
+        <div class="p-6 text-2xl font-bold text-white tracking-tighter">
+            GAMEVAULT <span class="text-xs text-[#888]">ADMIN</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-2">
+            <a href="dashboard.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-home w-6"></i> Dashboard</a>
+            <a href="games.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-gamepad w-6"></i> Games</a>
+            <a href="users.html" class="flex items-center p-3 bg-white text-black hover:bg-gray-200 border-white text-xs text-center rounded-lg shadow-lg font-bold"><i class="fas fa-users w-6"></i> Users</a>
+            <a href="orders.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-shopping-cart w-6"></i> Orders</a>
+            <a href="reports.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-chart-bar w-6"></i> Reports & Comms</a>
+            <a href="banners.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-images w-6"></i> Banners Hub</a>
+        </nav>
+        <div class="p-4 border-t border-[#1f1f1f]">
+            <button id="btnLogout" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"><i class="fas fa-sign-out-alt w-6"></i> Logout</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        <header class="h-16 bg-[#1a1a1a] border-b border-[#1f1f1f] flex items-center justify-between px-8 shrink-0">
+            <h2 class="text-xl font-semibold">User Management</h2>
+        </header>
+
+        <section class="p-8 overflow-y-auto flex-1">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="relative w-full md:w-[400px]">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-[#888]"></i>
+                    <input type="text" id="searchInput" placeholder="Search users by name or email..." class="w-full bg-[#1a1a1a] border border-[#1f1f1f] rounded-lg pl-11 pr-4 py-3 focus:border-white text-white text-sm outline-none transition shadow-sm">
+                </div>
+                <div class="flex items-center space-x-3 w-full md:w-auto">
+                    <span class="text-[#888] font-semibold uppercase tracking-wider text-xs whitespace-nowrap">Sort By:</span>
+                    <select id="sortSelect" class="bg-[#1a1a1a] border border-[#1f1f1f] rounded-lg px-4 py-3 focus:border-white text-white outline-none transition appearance-none pr-8 relative cursor-pointer text-sm shadow-sm w-full md:w-48">
+                        <option value="nameAsc">Name (A - Z)</option>
+                        <option value="nameDesc">Name (Z - A)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-[#1a1a1a] rounded-xl border border-[#1f1f1f] overflow-hidden shadow-lg">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-700/50 text-[#888] text-sm uppercase tracking-wider border-b border-[#1f1f1f]">
+                            <th class="p-4 font-medium w-16 text-center">Avatar</th>
+                            <th class="p-4 font-medium">Username</th>
+                            <th class="p-4 font-medium">Email</th>
+                            <th class="p-4 font-medium">UID</th>
+                            <th class="p-4 font-medium text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-gray-700/50">
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-[#555] italic"><i class="fas fa-spinner fa-spin mr-2"></i>Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Viewing User Details -->
+    <div id="userModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden backdrop-blur-sm transition-opacity overflow-y-auto py-10">
+        <div class="bg-[#1a1a1a] rounded-2xl border border-[#1f1f1f] w-full max-w-lg p-6 shadow-2xl relative my-auto">
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-[#888] hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="text-2xl font-bold mb-6 border-b border-[#1f1f1f] pb-2">User Details</h3>
+
+            <div id="userDetailsContent" class="space-y-4">
+                <div class="flex items-center space-x-4 mb-6">
+                    <img id="viewUserAvatar" src="" class="w-16 h-16 rounded-full object-cover border-2 border-[#2a2a2a] hidden">
+                    <div id="viewUserInitials" class="w-16 h-16 rounded-full bg-gray-700 border-2 border-[#2a2a2a] flex items-center justify-center font-bold text-xl hidden"></div>
+                    <div>
+                        <div id="viewUserName" class="text-xl font-bold text-white"></div>
+                        <div id="viewUserEmail" class="text-sm text-[#888]"></div>
+                    </div>
+                </div>
+
+                <h4 class="text-sm font-bold mt-6 mb-3 border-b border-[#1f1f1f] pb-1 text-[#ccc] uppercase tracking-widest">Contact & Billing</h4>
+                <div class="space-y-3 mb-6">
+                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-3">
+                        <label class="block text-[10px] font-semibold text-[#555] uppercase mb-1">Phone Number</label>
+                        <div id="viewUserPhone" class="text-sm text-[#ccc]"></div>
+                    </div>
+                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-3">
+                        <label class="block text-[10px] font-semibold text-[#555] uppercase mb-1">Billing Address</label>
+                        <div id="viewUserAddress" class="text-sm text-[#ccc] leading-relaxed whitespace-pre-line"></div>
+                    </div>
+                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-3">
+                        <label class="block text-[10px] font-semibold text-[#555] uppercase mb-1">User ID</label>
+                        <div id="viewUserId" class="text-xs text-[#ccc] font-mono select-all"></div>
+                    </div>
+                </div>
+                
+                <h4 class="text-sm font-bold mt-6 mb-3 border-b border-[#1f1f1f] pb-1 text-[#ccc] uppercase tracking-widest">Account Stats</h4>
+                <div id="userStatsLoading" class="text-sm text-[#fff] font-bold py-4 text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Calculating sizes...</div>
+                
+                <div id="userStatsGrid" class="grid grid-cols-3 gap-3 hidden">
+                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-3 text-center">
+                        <i class="fas fa-gamepad text-xl text-white mb-1"></i>
+                        <div class="text-[10px] text-[#555] uppercase font-semibold">Library</div>
+                        <div id="statLibrary" class="text-xl font-bold text-white">0</div>
+                    </div>
+                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-3 text-center">
+                        <i class="fas fa-heart text-xl text-red-500 mb-1"></i>
+                        <div class="text-[10px] text-[#555] uppercase font-semibold">Favorites</div>
+                        <div id="statFavorites" class="text-xl font-bold text-white">0</div>
+                    </div>
+                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-3 text-center">
+                        <i class="fas fa-shopping-cart text-xl text-green-500 mb-1"></i>
+                        <div class="text-[10px] text-[#555] uppercase font-semibold">Cart Items</div>
+                        <div id="statCart" class="text-xl font-bold text-white">0</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t border-[#1f1f1f] mt-6">
+                    <button type="button" id="closeDetailBtn" class="bg-gray-700 hover:bg-[#2a2a2a] px-6 py-2 rounded-lg font-bold text-white transition shadow-lg">Close Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Same Config as other pages
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfgmqKJHdj3udZiK9ubTuJWGqj9JWIYPI",
+            authDomain: "gamevault-ffe65.firebaseapp.com",
+            projectId: "gamevault-ffe65",
+            storageBucket: "gamevault-ffe65.firebasestorage.app",
+            messagingSenderId: "152244395979",
+            appId: "1:152244395979:web:f81081c09c6d9aa41b204e",
+            measurementId: "G-KXPXH90XKF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUsersList = [];
+
+        // Protection
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('bodyContent').classList.remove('hidden');
+                loadUsers();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Logout Flow
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.href = "index.html");
+        });
+
+        // Modal Operations
+        const modal = document.getElementById('userModal');
+
+        document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.add('hidden'));
+        document.getElementById('closeDetailBtn').addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Load Users
+        async function loadUsers() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                currentUsersList = [];
+
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    user.uid = doc.id; // Usually doc.id is same as user.uid
+                    currentUsersList.push(user);
+                });
+
+                applyFiltersAndSort();
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">Failed to load users.</td></tr>`;
+            }
+        }
+
+        // Search & Sorting Handler
+        document.getElementById('searchInput').addEventListener('input', applyFiltersAndSort);
+        document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSort);
+
+        function applyFiltersAndSort() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sortMode = document.getElementById('sortSelect').value;
+
+            let result = currentUsersList.filter(user => {
+                const uname = (user.username || '').toLowerCase();
+                const uemail = (user.email || '').toLowerCase();
+                return uname.includes(searchTerm) || uemail.includes(searchTerm);
+            });
+
+            result.sort((a, b) => {
+                const nameA = (a.username || '').toLowerCase();
+                const nameB = (b.username || '').toLowerCase();
+
+                if (sortMode === 'nameAsc') return nameA.localeCompare(nameB);
+                if (sortMode === 'nameDesc') return nameB.localeCompare(nameA);
+                return 0;
+            });
+
+            renderUsersTable(result);
+        }
+
+        function renderUsersTable(usersArray) {
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = '';
+
+            if (usersArray.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-[#555] italic">No users found.</td></tr>`;
+                return;
+            }
+
+            usersArray.forEach(user => {
+                const picHtml = user.profilePicUrl 
+                    ? `<img src="${user.profilePicUrl}" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-[#1f1f1f] mx-auto" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'User')}&background=random'">`
+                    : `<div class="w-10 h-10 rounded-full bg-gray-700 border-2 border-[#2a2a2a] flex items-center justify-center mx-auto text-xs font-bold">${(user.username || 'U').charAt(0).toUpperCase()}</div>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-700/30 transition duration-150";
+                tr.innerHTML = `
+                    <td class="p-3 text-center">${picHtml}</td>
+                    <td class="p-3 font-medium text-white">${user.username || '<span class="text-[#555] italic">No name provided</span>'}</td>
+                    <td class="p-3 text-[#888]">${user.email || 'N/A'}</td>
+                    <td class="p-3 text-xs text-[#555] font-mono select-all">${user.uid}</td>
+                    <td class="p-3 text-right space-x-3">
+                        <button type="button" class="view-btn text-[#fff] font-bold hover:text-blue-300 transition" data-id="${user.uid}"><i class="fas fa-id-card text-lg"></i></button>
+                        <button type="button" class="delete-btn text-red-400 hover:text-red-300 transition" data-id="${user.uid}" data-name="${user.username || 'this user'}"><i class="fas fa-trash text-lg"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Event Delegation for Table Buttons
+        document.getElementById('usersTableBody').addEventListener('click', async (e) => {
+            const viewBtn = e.target.closest('.view-btn');
+            const deleteBtn = e.target.closest('.delete-btn');
+
+            if (viewBtn) {
+                const rId = viewBtn.getAttribute('data-id');
+                const tUser = currentUsersList.find(u => u.uid === rId);
+                
+                if (tUser) {
+                    // Reset View Elements
+                    document.getElementById('viewUserAvatar').classList.add('hidden');
+                    document.getElementById('viewUserInitials').classList.add('hidden');
+                    document.getElementById('userStatsGrid').classList.add('hidden');
+                    document.getElementById('userStatsLoading').classList.remove('hidden');
+
+                    // Set Base Info
+                    if (tUser.profilePicUrl) {
+                        const img = document.getElementById('viewUserAvatar');
+                        img.src = tUser.profilePicUrl;
+                        
+                        // If image fails to load, fallback magically to initials
+                        img.onerror = () => {
+                            img.classList.add('hidden');
+                            showInitialsFallback(tUser);
+                        };
+                        img.classList.remove('hidden');
+                    } else {
+                        showInitialsFallback(tUser);
+                    }
+                    
+                    document.getElementById('viewUserName').innerText = tUser.username || 'No name provided';
+                    document.getElementById('viewUserEmail').innerText = tUser.email || 'N/A';
+                    document.getElementById('viewUserId').innerText = tUser.uid;
+                    document.getElementById('viewUserPhone').innerText = tUser.phone || 'No phone number provided';
+                    
+                    const addr1 = tUser.addressLine1 || '';
+                    const addr2 = tUser.addressLine2 || '';
+                    const fullAddress = [addr1, addr2].filter(a => a.trim() !== '').join('\n');
+                    document.getElementById('viewUserAddress').innerText = fullAddress || 'No billing address provided';
+                    
+                    modal.classList.remove('hidden');
+
+                    // Fetch Stats Async from subcollections
+                    try {
+                        const libSnap = await getDocs(collection(db, "users", tUser.uid, "library"));
+                        const favSnap = await getDocs(collection(db, "users", tUser.uid, "favorites"));
+                        const cartSnap = await getDocs(collection(db, "users", tUser.uid, "cart"));
+                        
+                        document.getElementById('statLibrary').innerText = libSnap.size;
+                        document.getElementById('statFavorites').innerText = favSnap.size;
+                        document.getElementById('statCart').innerText = cartSnap.size;
+                    } catch (e) {
+                        console.error('Failed to load stats', e);
+                    } finally {
+                        document.getElementById('userStatsLoading').classList.add('hidden');
+                        document.getElementById('userStatsGrid').classList.remove('hidden');
+                    }
+                }
+            }
+
+            if (deleteBtn) {
+                const rId = deleteBtn.getAttribute('data-id');
+                const uName = deleteBtn.getAttribute('data-name');
+                const tr = deleteBtn.closest('tr');
+
+                const confirmed = confirm(`Are you sure you want to delete profile data for "${uName}"?\nNotice: This only deletes their Firestore profile data, not their Firebase Authentication record.`);
+                
+                if (confirmed) {
+                    try {
+                        await deleteDoc(doc(db, "users", rId));
+                        tr.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                        setTimeout(() => {
+                            loadUsers(); 
+                        }, 500);
+                    } catch (error) {
+                        console.error("Error deleting user:", error);
+                        alert("Failed to delete user profile: " + error.message);
+                    }
+                }
+            }
+        });
+
+        function showInitialsFallback(tUser) {
+            const init = document.getElementById('viewUserInitials');
+            init.innerText = (tUser.username || 'U').charAt(0).toUpperCase();
+            init.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

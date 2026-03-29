@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault | Manage Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    </style>
+</head>
+
+<body class="bg-[#0a0a0a] text-white flex h-screen font-sans hidden" id="bodyContent">
+
+    <aside class="w-64 bg-[#1a1a1a] flex flex-col border-r border-[#1f1f1f] z-10 shrink-0">
+        <div class="p-6 text-2xl font-bold text-white tracking-tighter">
+            GAMEVAULT <span class="text-xs text-[#888]">ADMIN</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-2">
+            <a href="dashboard.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-home w-6"></i> Dashboard</a>
+            <a href="games.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-gamepad w-6"></i> Games</a>
+            <a href="users.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-users w-6"></i> Users</a>
+            <a href="orders.html" class="flex items-center p-3 bg-white text-black hover:bg-gray-200 border-white text-xs text-center rounded-lg shadow-lg font-bold"><i class="fas fa-shopping-cart w-6"></i> Orders</a>
+            <a href="reports.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-chart-bar w-6"></i> Reports & Comms</a>
+            <a href="banners.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-images w-6"></i> Banners Hub</a>
+        </nav>
+        <div class="p-4 border-t border-[#1f1f1f]">
+            <button id="btnLogout" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"><i class="fas fa-sign-out-alt w-6"></i> Logout</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        <header class="h-16 bg-[#1a1a1a] border-b border-[#1f1f1f] flex items-center justify-between px-8 shrink-0">
+            <h2 class="text-xl font-semibold">Order Management</h2>
+        </header>
+
+        <section class="p-8 overflow-y-auto flex-1">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="relative w-full md:w-[400px]">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-[#888]"></i>
+                    <input type="text" id="searchInput" placeholder="Search orders by ID or customer..." class="w-full bg-[#1a1a1a] border border-[#1f1f1f] rounded-lg pl-11 pr-4 py-3 focus:border-white text-white text-sm outline-none transition shadow-sm">
+                </div>
+                <div class="flex items-center space-x-3 w-full md:w-auto">
+                    <span class="text-[#888] font-semibold uppercase tracking-wider text-xs whitespace-nowrap">Sort By:</span>
+                    <select id="sortSelect" class="bg-[#1a1a1a] border border-[#1f1f1f] rounded-lg px-4 py-3 focus:border-white text-white outline-none transition appearance-none pr-8 relative cursor-pointer text-sm shadow-sm w-full md:w-48">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-[#1a1a1a] rounded-xl border border-[#1f1f1f] overflow-hidden shadow-lg">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-700/50 text-[#888] text-sm uppercase tracking-wider border-b border-[#1f1f1f]">
+                            <th class="p-4 font-medium">Order ID</th>
+                            <th class="p-4 font-medium">Date</th>
+                            <th class="p-4 font-medium">Customer</th>
+                            <th class="p-4 font-medium">Amount (LKR)</th>
+                            <th class="p-4 font-medium">Status</th>
+                            <th class="p-4 font-medium text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody" class="divide-y divide-gray-700/50">
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-[#555] italic"><i class="fas fa-spinner fa-spin mr-2"></i>Loading orders...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Order Details & Status Update -->
+    <div id="orderModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden backdrop-blur-sm transition-opacity overflow-y-auto py-10">
+        <div class="bg-[#1a1a1a] rounded-2xl border border-[#1f1f1f] w-full max-w-2xl p-6 shadow-2xl relative my-auto">
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-[#888] hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="text-2xl font-bold mb-1">Order Summary</h3>
+            <div id="modalOrderId" class="text-xs text-[#555] font-mono mb-6 pb-4 border-b border-[#1f1f1f] select-all"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Status Updater -->
+                <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-4">
+                    <label class="block text-[10px] font-semibold text-[#555] uppercase mb-2">Order Status</label>
+                    <div class="flex items-center space-x-3">
+                        <select id="updateStatusSelect" class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-white outline-none w-full text-sm">
+                            <option value="PENDING">PENDING</option>
+                            <option value="PROCESSING">PROCESSING</option>
+                            <option value="SHIPPED">SHIPPED</option>
+                            <option value="DELIVERED">DELIVERED</option>
+                            <option value="PAID">PAID</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                        </select>
+                        <button type="button" id="saveStatusBtn" class="bg-white text-black hover:bg-gray-200 px-4 py-2 rounded-lg font-bold text-sm shrink-0 transition">Save</button>
+                    </div>
+                    <div id="statusUpdateMsg" class="text-xs text-emerald-400 mt-2 hidden">Status updated successfully!</div>
+                </div>
+
+                <!-- Billing Information -->
+                <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-4">
+                    <label class="block text-[10px] font-semibold text-[#555] uppercase mb-2">Billing & Delivery Info</label>
+                    <div id="modalBillingName" class="font-bold text-white text-sm"></div>
+                    <div id="modalBillingEmail" class="text-sm text-[#888] mb-2"></div>
+                    <div id="modalBillingPhone" class="text-sm text-[#ccc]"></div>
+                    <div id="modalBillingAddress" class="text-sm text-[#555] mt-1 whitespace-pre-line leading-relaxed"></div>
+                    <div class="text-xs text-gray-600 font-mono mt-2" id="modalUserId">UID: </div>
+                </div>
+            </div>
+
+            <!-- Receipt Items -->
+            <label class="block text-[10px] font-semibold text-[#555] uppercase mb-2">Order Items</label>
+            <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg overflow-hidden border-b-0 max-h-48 overflow-y-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-[#1a1a1a] border-b border-[#1f1f1f] text-[#888]">
+                        <tr>
+                            <th class="p-3 font-medium">Game ID</th>
+                            <th class="p-3 font-medium text-center">Qty</th>
+                            <th class="p-3 font-medium text-right">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalItemsTableBody" class="divide-y divide-gray-700">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 flex justify-between items-center bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg p-4">
+                <span class="text-[#888] font-bold uppercase tracking-wider">Total</span>
+                <span id="modalTotalAmount" class="text-2xl font-bold text-[#fff] font-bold">Rs. 0.00</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase Setup
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfgmqKJHdj3udZiK9ubTuJWGqj9JWIYPI",
+            authDomain: "gamevault-ffe65.firebaseapp.com",
+            projectId: "gamevault-ffe65",
+            storageBucket: "gamevault-ffe65.firebasestorage.app",
+            messagingSenderId: "152244395979",
+            appId: "1:152244395979:web:f81081c09c6d9aa41b204e",
+            measurementId: "G-KXPXH90XKF"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentOrdersList = [];
+        let currentlySelectedOrder = null;
+
+        // Protection
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('bodyContent').classList.remove('hidden');
+                loadOrders();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.href = "index.html");
+        });
+
+        // Load Orders
+        async function loadOrders() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "orders"));
+                currentOrdersList = [];
+
+                querySnapshot.forEach((docSnap) => {
+                    const order = docSnap.data();
+                    order.realDocId = docSnap.id;
+                    currentOrdersList.push(order);
+                });
+
+                applyFiltersAndSort();
+            } catch (error) {
+                console.error("Error fetching orders:", error);
+                document.getElementById('ordersTableBody').innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Failed to load orders.</td></tr>`;
+            }
+        }
+
+        // Search & Sorting
+        document.getElementById('searchInput').addEventListener('input', applyFiltersAndSort);
+        document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSort);
+
+        function applyFiltersAndSort() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sortMode = document.getElementById('sortSelect').value;
+
+            // Filter
+            let result = currentOrdersList.filter(order => {
+                const oid = (order.orderId || order.realDocId || '').toLowerCase();
+                const bName = (order.billingAddress?.fullName || '').toLowerCase();
+                return oid.includes(searchTerm) || bName.includes(searchTerm);
+            });
+
+            // Sort
+            result.sort((a, b) => {
+                const timeA = a.orderDate || 0;
+                const timeB = b.orderDate || 0;
+                if (sortMode === 'newest') return timeB - timeA;
+                if (sortMode === 'oldest') return timeA - timeB;
+                return 0;
+            });
+
+            renderOrdersTable(result);
+        }
+
+        function getStatusColorClass(status) {
+            const upStat = (status || '').toUpperCase();
+            if (['COMPLETED', 'DELIVERED', 'PAID'].includes(upStat)) return 'text-emerald-400 bg-emerald-400/10 border border-emerald-400/20';
+            if (['PENDING', 'PROCESSING'].includes(upStat)) return 'text-amber-400 bg-amber-400/10 border border-amber-400/20';
+            if (upStat === 'SHIPPED') return 'text-[#fff] font-bold bg-blue-400/10 border border-blue-400/20';
+            return 'text-red-400 bg-red-400/10 border border-red-400/20'; // CANCELLED or FAILED
+        }
+
+        function formatEpoch(epochMs) {
+            if (!epochMs) return "N/A";
+            const d = new Date(epochMs);
+            return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function renderOrdersTable(ordersArray) {
+            const tableBody = document.getElementById('ordersTableBody');
+            tableBody.innerHTML = '';
+
+            if (ordersArray.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-[#555] italic">No orders found.</td></tr>`;
+                return;
+            }
+
+            ordersArray.forEach(order => {
+                const statClass = getStatusColorClass(order.status);
+                const displayId = order.orderId || order.realDocId;
+                const customer = order.billingAddress?.fullName || 'Unknown';
+                const amt = (order.totalAmount || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-700/30 transition duration-150";
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-white text-xs whitespace-nowrap">${displayId.substring(0,18)}...</td>
+                    <td class="p-4 text-[#888] text-sm whitespace-nowrap">${formatEpoch(order.orderDate)}</td>
+                    <td class="p-4 text-white font-medium">${customer}</td>
+                    <td class="p-4 text-[#ccc] font-bold tracking-wide">${amt}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-[10px] font-bold tracking-widest ${statClass}">${(order.status||'UNKNOWN').toUpperCase()}</span></td>
+                    <td class="p-4 text-right">
+                        <button type="button" class="view-btn text-white font-bold bg-blue-600/20 hover:bg-blue-600 border border-blue-600/50 px-3 py-1.5 rounded transition text-xs shadow-sm" data-id="${order.realDocId}">Manage</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Modal Operations
+        const modal = document.getElementById('orderModal');
+        document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.add('hidden'));
+
+        document.getElementById('ordersTableBody').addEventListener('click', (e) => {
+            const viewBtn = e.target.closest('.view-btn');
+            if (viewBtn) {
+                const rId = viewBtn.getAttribute('data-id');
+                const tOrder = currentOrdersList.find(o => o.realDocId === rId);
+                
+                if (tOrder) {
+                    currentlySelectedOrder = tOrder;
+                    
+                    document.getElementById('modalOrderId').innerText = tOrder.orderId || tOrder.realDocId;
+                    
+                    // Reset Status UI
+                    const stMsg = document.getElementById('statusUpdateMsg');
+                    stMsg.classList.add('hidden');
+                    document.getElementById('updateStatusSelect').value = (tOrder.status || 'PENDING').toUpperCase();
+
+                    // Billing Set
+                    document.getElementById('modalBillingName').innerText = tOrder.billingAddress?.fullName || 'N/A';
+                    document.getElementById('modalBillingEmail').innerText = tOrder.billingAddress?.email || 'N/A';
+                    document.getElementById('modalBillingPhone').innerText = tOrder.billingAddress?.phoneNumber || 'N/A';
+                    document.getElementById('modalUserId').innerText = "UID: " + (tOrder.userId || 'N/A');
+                    
+                    const a1 = tOrder.billingAddress?.addressLine1 || '';
+                    const a2 = tOrder.billingAddress?.addressLine2 || '';
+                    const city = tOrder.billingAddress?.city || '';
+                    const zip = tOrder.billingAddress?.postalCode || '';
+                    const AddrArr = [a1, a2, city, zip].filter(s => s && s.trim() !== '');
+                    document.getElementById('modalBillingAddress').innerText = AddrArr.join('\n') || 'No address provided';
+
+                    // Total
+                    document.getElementById('modalTotalAmount').innerText = "Rs. " + (tOrder.totalAmount || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+
+                    // Items Table
+                    const itemsBody = document.getElementById('modalItemsTableBody');
+                    itemsBody.innerHTML = '';
+                    if (tOrder.orderItems && tOrder.orderItems.length > 0) {
+                        tOrder.orderItems.forEach(item => {
+                            const tr = document.createElement('tr');
+                            const pr = (item.unitPrice || 0) * (item.qty || 1);
+                            tr.innerHTML = `
+                                <td class="p-3 text-[#ccc] font-mono text-xs select-all break-all">${item.gameId || 'Unknown'}</td>
+                                <td class="p-3 text-white font-bold text-center">x${item.qty || 1}</td>
+                                <td class="p-3 text-[#ccc] text-right font-mono text-xs">${pr.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            `;
+                            itemsBody.appendChild(tr);
+                        });
+                    } else {
+                        itemsBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-[#555] text-xs italic">No items recorded.</td></tr>`;
+                    }
+
+                    modal.classList.remove('hidden');
+                }
+            }
+        });
+
+        // Save Status Logic
+        document.getElementById('saveStatusBtn').addEventListener('click', async () => {
+            if (!currentlySelectedOrder) return;
+            const btn = document.getElementById('saveStatusBtn');
+            const sel = document.getElementById('updateStatusSelect');
+            const msg = document.getElementById('statusUpdateMsg');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            try {
+                const newStatus = sel.value;
+                await updateDoc(doc(db, "orders", currentlySelectedOrder.realDocId), {
+                    status: newStatus
+                });
+                
+                currentlySelectedOrder.status = newStatus;
+                
+                // Show success message briefly
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 3000);
+                
+                // Reload array & table to reflect change behind modal
+                applyFiltersAndSort(); 
+            } catch (err) {
+                console.error("Error updating status: ", err);
+                alert("Failed to update status.");
+            } finally {
+                btn.innerHTML = 'Save';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
