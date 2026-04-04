@@ -63,7 +63,7 @@ function getSidebar(activePage) {
                 <i class="fas fa-chart-bar w-4 text-center"></i> Reports & Comms
             </a>
             <a href="banners.html" class="nav-link ` + (activePage==='banners.html'?'active':(activePage!=='banners.html'?'text-[#888]':'')) + ` flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm">
-                <i class="fas fa-images w-4 text-center"></i> Banners Hub
+                <i class="fas fa-images w-4 text-center"></i> Banners 
             </a>
         </nav>
         <div class="p-3 border-t border-[#1f1f1f]">

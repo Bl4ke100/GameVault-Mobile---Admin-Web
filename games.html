@@ -11,39 +11,15 @@
 
 <body class="bg-[#0a0a0a] text-white flex h-screen font-sans hidden" id="bodyContent">
 
-    <aside class="w-64 bg-[#1a1a1a] flex flex-col border-r border-[#1f1f1f] z-10">
-        <div class="p-6 text-2xl font-bold text-white tracking-tighter">
-            GAMEVAULT <span class="text-xs text-[#888]">ADMIN</span>
-        </div>
-        <nav class="flex-1 px-4 space-y-2">
-            <a href="dashboard.html"
-                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i
-                    class="fas fa-home w-6"></i> Dashboard</a>
-            <a href="games.html" class="flex items-center p-3 bg-white text-black hover:bg-gray-200 border-white text-xs text-center rounded-lg"><i class="fas fa-gamepad w-6"></i> Games</a>
-            <a href="users.html"
-                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i
-                    class="fas fa-users w-6"></i> Users</a>
-            <a href="orders.html"
-                class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i
-                    class="fas fa-shopping-cart w-6"></i> Orders</a>
-            <a href="reports.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-chart-bar w-6"></i> Reports & Comms</a>
-            <a href="banners.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-images w-6"></i> Banners Hub</a>
-        </nav>
-        <div class="p-4 border-t border-[#1f1f1f]">
-            <button id="btnLogout"
-                class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"><i
-                    class="fas fa-sign-out-alt w-6"></i> Logout</button>
-        </div>
-    </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden relative">
-        <header class="h-16 bg-[#1a1a1a] border-b border-[#1f1f1f] flex items-center justify-between px-8">
-            <h2 class="text-xl font-semibold">Game Management</h2>
-            <button id="openModalBtn"
-                class="bg-white text-black hover:bg-gray-200 px-4 py-2 rounded-lg font-bold transition text-sm">
-                <i class="fas fa-plus mr-2"></i> Add New Game
+        <div id="header-container"></div>
+        <div id="header-actions" class="hidden">
+            <button id="openModalBtn" class="bg-white text-black hover:bg-gray-200 px-3 py-1 rounded-md font-bold transition text-[10px] uppercase tracking-wider flex items-center gap-2">
+                <i class="fas fa-plus"></i> Add New Game
             </button>
-        </header>
+        </div>
+
 
         <section class="p-8 overflow-y-auto flex-1">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -228,7 +204,7 @@
         const storage = getStorage(app);
 
         let currentGamesList = [];
-        let selectedGalleryFiles = []; // Our custom array for image sorting
+        let selectedGalleryFiles = [];
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -240,11 +216,10 @@
             }
         });
 
-        document.getElementById('btnLogout').addEventListener('click', () => {
+        window.firebaseLogout = () => {
             signOut(auth).then(() => window.location.href = "index.html");
-        });
+        };
 
-        // --- DROPDOWN LOGIC ---
         async function loadDropdowns() {
             try {
                 const catSelect = document.getElementById('catId');
@@ -264,7 +239,6 @@
             } catch (error) { console.error("Error loading dropdowns:", error); }
         }
 
-        // --- MODAL TOGGLES ---
         const modal = document.getElementById('addGameModal');
         const form = document.getElementById('addGameForm');
         const previewDiv = document.getElementById('galleryPreview');
@@ -284,7 +258,6 @@
         document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.add('hidden'));
         document.getElementById('cancelBtn').addEventListener('click', () => modal.classList.add('hidden'));
 
-        // --- LOAD GAMES & BIND EDIT BUTTONS ---
         async function loadGames() {
             try {
                 const querySnapshot = await getDocs(collection(db, "games"));
@@ -299,7 +272,6 @@
             } catch (error) { console.error("Error fetching games: ", error); }
         }
 
-        // --- SEARCH & SORT LOGIC ---
         document.getElementById('searchInput').addEventListener('input', applyFiltersAndSort);
         document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSort);
 
@@ -307,13 +279,11 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const sortMode = document.getElementById('sortSelect').value;
 
-            // 1. Filter
             let result = currentGamesList.filter(game => {
                 const title = (game.title || '').toLowerCase();
                 return title.includes(searchTerm);
             });
 
-            // 2. Sort
             result.sort((a, b) => {
                 const titleA = (a.title || '').toLowerCase();
                 const titleB = (b.title || '').toLowerCase();
@@ -333,7 +303,6 @@
                 }
             });
 
-            // 3. Render
             renderGamesTable(result);
         }
 
@@ -364,37 +333,30 @@
             });
         }
 
-        // Event Delegation for Edit Buttons
-        // --- TABLE ACTIONS (Edit & Delete) ---
         document.getElementById('gamesTableBody').addEventListener('click', async (e) => {
             const editBtn = e.target.closest('.edit-btn');
-            const deleteBtn = e.target.closest('.text-red-400'); // Targeted the trash button class
+            const deleteBtn = e.target.closest('.text-red-400');
 
-            // HANDLE EDIT
             if (editBtn) {
                 const realId = editBtn.getAttribute('data-id');
                 const gameToEdit = currentGamesList.find(g => g.realDocId === realId);
                 if (gameToEdit) openEditModal(gameToEdit);
             }
 
-            // HANDLE DELETE
             if (deleteBtn) {
                 const tr = deleteBtn.closest('tr');
                 const gameTitle = tr.querySelector('td:nth-child(2)').innerText;
-                const realId = deleteBtn.previousElementSibling.getAttribute('data-id'); // Gets ID from edit btn
+                const realId = deleteBtn.previousElementSibling.getAttribute('data-id');
 
-                // 1. Simple Confirmation
                 const confirmed = confirm(`Are you sure you want to delete "${gameTitle}"?\nThis cannot be undone.`);
 
                 if (confirmed) {
                     try {
-                        // 2. Remove from Firestore
                         await deleteDoc(doc(db, "games", realId));
 
-                        // 3. UI Feedback
                         tr.classList.add('opacity-0', 'transition-opacity', 'duration-500');
                         setTimeout(() => {
-                            loadGames(); // Refresh table
+                            loadGames();
                             alert("Game deleted successfully.");
                         }, 500);
 
@@ -406,7 +368,6 @@
             }
         });
 
-        // --- POPULATE THE MODAL FOR EDITING ---
         function openEditModal(game) {
             form.reset();
             selectedGalleryFiles = [];
@@ -416,7 +377,6 @@
             document.getElementById('saveGameBtn').innerText = "Update Game";
             document.getElementById('posterFile').required = false;
 
-            // SET BOTH IDs
             document.getElementById('editRealDocId').value = game.realDocId;
             document.getElementById('editCustomGameId').value = game.gameId || "";
 
@@ -440,7 +400,6 @@
             modal.classList.remove('hidden');
         }
 
-        // --- CUSTOM GALLERY SORTING LOGIC ---
         const galleryInput = document.getElementById('galleryFiles');
 
         galleryInput.addEventListener('change', function (e) {
@@ -499,7 +458,6 @@
             renderGalleryPreview();
         });
 
-        // --- FORM SUBMIT (Handles BOTH Add and Edit) ---
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -513,11 +471,9 @@
                 const customGameId = document.getElementById('editCustomGameId').value;
                 const isEditing = realDocId !== "";
 
-                // THE FIX: Use custom ID for folders, but Real ID for the database!
                 const documentIdToSave = isEditing ? realDocId : doc(collection(db, "games")).id;
                 const storageFolderId = isEditing ? customGameId : documentIdToSave;
 
-                // 1. Upload Images
                 const posterFile = document.getElementById('posterFile').files[0];
                 if (posterFile) {
                     const posterRef = ref(storage, `images/game-images/${storageFolderId}/poster.png`);
@@ -534,7 +490,6 @@
                     }
                 }
 
-                // 2. Parse Platforms
                 const checkedBoxes = document.querySelectorAll('.platform-checkbox:checked');
                 const selectedPlatforms = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -544,7 +499,6 @@
                     values: selectedPlatforms
                 }];
 
-                // 3. Build the Database Object
                 const gameData = {
                     title: document.getElementById('gameTitle').value,
                     price: parseFloat(document.getElementById('gamePrice').value),
@@ -568,7 +522,6 @@
                     if (selectedGalleryFiles.length > 0) gameData.images = imageNamesArray;
                 }
 
-                // 4. Save to Firestore
                 if (isEditing) {
                     await updateDoc(doc(db, "games", documentIdToSave), gameData);
                 } else {
@@ -590,6 +543,7 @@
 
 
     </script>
+    <script src="components.js"></script>
 </body>
 
 </html>

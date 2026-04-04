@@ -58,7 +58,6 @@
             transform: none;
         }
 
-        /* Subtle grid background */
         .bg-grid {
             background-color: #000000;
             background-image:
@@ -73,45 +72,37 @@
 
     <div class="w-full max-w-sm px-4">
 
-        <!-- Logo -->
         <div class="text-center mb-10">
             <h1 class="text-4xl font-black tracking-tighter text-white">GAME<span
                     class="text-white opacity-30">VAULT</span></h1>
             <p class="text-[#444] text-xs mt-2 tracking-widest uppercase">Administrative Console</p>
         </div>
 
-        <!-- Card -->
         <div class="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-8 shadow-2xl">
 
-            <!-- Card Header -->
             <div class="mb-7">
                 <h2 class="text-lg font-bold text-white">Sign In</h2>
                 <p class="text-[#555] text-xs mt-1">Enter your credentials to access the console</p>
             </div>
 
-            <!-- Form -->
             <form id="loginForm" class="space-y-4">
 
-                <!-- Email -->
                 <div>
                     <label class="block text-[10px] font-bold text-[#555] uppercase tracking-widest mb-2">Email
                         Address</label>
                     <input type="email" id="email" required placeholder="admin@gamevault.com" class="input-field" />
                 </div>
 
-                <!-- Password -->
                 <div>
                     <label
                         class="block text-[10px] font-bold text-[#555] uppercase tracking-widest mb-2">Password</label>
                     <input type="password" id="password" required placeholder="••••••••" class="input-field" />
                 </div>
 
-                <!-- Error Message -->
                 <div id="errorMessage"
                     class="hidden text-red-400 text-xs bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-lg">
                 </div>
 
-                <!-- Submit -->
                 <div class="pt-2">
                     <button type="submit" id="loginBtn" class="btn-login">
                         Sign In
@@ -122,7 +113,6 @@
 
         </div>
 
-        <!-- Footer -->
         <p class="text-center text-[#333] text-[10px] mt-6 tracking-widest uppercase">
             © 2025 GameVault. All rights reserved.
         </p>

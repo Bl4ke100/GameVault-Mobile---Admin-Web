@@ -30,34 +30,18 @@
 
 <body class="bg-[#0a0a0a] text-white flex h-screen font-sans hidden" id="bodyContent">
 
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-[#1a1a1a] flex flex-col border-r border-[#1f1f1f] shrink-0">
-        <div class="p-6 text-2xl font-bold text-white tracking-tighter">
-            GAMEVAULT <span class="text-xs text-[#888]">ADMIN</span>
-        </div>
-        <nav class="flex-1 px-4 space-y-2">
-            <a href="dashboard.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-home w-6"></i> Dashboard</a>
-            <a href="games.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-gamepad w-6"></i> Games</a>
-            <a href="users.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-users w-6"></i> Users</a>
-            <a href="orders.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-shopping-cart w-6"></i> Orders</a>
-            <a href="reports.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-chart-bar w-6"></i> Reports & Comms</a>
-            <a href="banners.html" class="flex items-center p-3 bg-white text-black hover:bg-gray-200 border-white text-xs text-center rounded-lg shadow-lg font-bold"><i class="fas fa-images w-6"></i> Banners Hub</a>
-        </nav>
-        <div class="p-4 border-t border-[#1f1f1f]">
-            <button id="btnLogout" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"><i class="fas fa-sign-out-alt w-6"></i> Logout</button>
-        </div>
-    </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col overflow-hidden relative">
-        <header class="h-16 bg-[#1a1a1a] border-b border-[#1f1f1f] flex items-center justify-between px-8 shrink-0">
-            <h2 class="text-xl font-semibold tracking-wide">Mobile Application Banners</h2>
-            <div id="globalStatus" class="text-xs font-bold text-[#fff] font-bold hidden"><i class="fas fa-spinner fa-spin mr-2"></i>Synchronizing Storage...</div>
-        </header>
+        <div id="header-container"></div>
+        <div id="header-actions" class="hidden">
+            <div id="globalStatus" class="text-[10px] font-bold text-[#888] uppercase tracking-wider flex items-center bg-[#1a1a1a] px-3 py-1 rounded border border-[#1f1f1f] hidden">
+                <i class="fas fa-spinner fa-spin mr-2"></i>Synchronizing Cloud Assets...
+            </div>
+        </div>
+
 
         <section class="p-8 overflow-y-auto flex-1 space-y-12">
             
-            <!-- TOP BANNERS SECTION -->
             <div>
                 <div class="flex items-center justify-between mb-6 border-b border-[#1f1f1f] pb-4">
                     <div>
@@ -71,12 +55,10 @@
                 </div>
                 
                 <div id="topBannersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <!-- Loaded dynamically via JS -->
                     <div class="col-span-full h-32 flex items-center justify-center text-[#555] italic"><i class="fas fa-compact-disc fa-spin mr-2"></i> Fetching assets from cloud...</div>
                 </div>
             </div>
 
-            <!-- NEW ARRIVALS BANNERS SECTION -->
             <div class="pt-6">
                 <div class="flex items-center justify-between mb-6 border-b border-[#1f1f1f] pb-4">
                     <div>
@@ -90,20 +72,17 @@
                 </div>
                 
                 <div id="newArrivalsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <!-- Loaded dynamically via JS -->
                 </div>
             </div>
 
         </section>
     </main>
 
-    <!-- Fullscreen Image Preview Modal (Optional) -->
     <div id="previewModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity p-4">
         <button id="closePreviewBtn" class="absolute top-6 right-6 text-[#888] hover:text-white"><i class="fas fa-times text-4xl"></i></button>
         <img id="previewImage" src="" class="max-w-full max-h-full rounded shadow-2xl border border-[#1f1f1f] object-contain">
     </div>
 
-    <!-- Firebase SDK & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -122,7 +101,6 @@
         const auth = getAuth(app);
         const storage = getStorage(app);
 
-        // UI State Protection
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('bodyContent').classList.remove('hidden');
@@ -132,15 +110,12 @@
             }
         });
 
-        document.getElementById('btnLogout').addEventListener('click', () => {
+        window.firebaseLogout = () => {
             signOut(auth).then(() => window.location.href = "index.html");
-        });
+        };
 
         const statusLabel = document.getElementById('globalStatus');
 
-        /* ============================
-           STORAGE CORE OPERATIONS
-        ============================ */
         async function refreshBothFolders() {
             statusLabel.classList.remove('hidden');
             statusLabel.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Synchronizing Storage...';
@@ -159,7 +134,7 @@
                 const folderRef = ref(storage, folderPath);
                 const result = await listAll(folderRef);
                 
-                grid.innerHTML = ''; // Clear grid
+                grid.innerHTML = ''; 
 
                 if(result.items.length === 0) {
                     grid.innerHTML = `<div class="col-span-full bg-[#1a1a1a]/50 border border-dashed border-[#1f1f1f] rounded-lg p-8 flex flex-col items-center justify-center text-[#555]">
@@ -169,7 +144,6 @@
                     return;
                 }
 
-                // Render each item
                 for (const itemRef of result.items) {
                     const url = await getDownloadURL(itemRef);
                     const name = itemRef.name;
@@ -195,19 +169,16 @@
             }
         }
 
-        /* ============================
-           UPLOAD EVENT LISTENERS
-        ============================ */
         document.getElementById('uploadTopBanners').addEventListener('change', async (e) => {
             const files = e.target.files;
             if(files.length > 0) await handleUploads(files, 'images/banners');
-            e.target.value = ''; // Reset
+            e.target.value = '';
         });
 
         document.getElementById('uploadNewArrivals').addEventListener('change', async (e) => {
             const files = e.target.files;
             if(files.length > 0) await handleUploads(files, 'images/new-arrivals');
-            e.target.value = ''; // Reset
+            e.target.value = '';
         });
 
         async function handleUploads(files, _folderPath) {
@@ -218,7 +189,6 @@
                 const file = files[i];
                 statusLabel.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Uploading ${i+1}/${files.length}...`;
                 
-                // Add epoch timestamp to guarantee unique asset name and avoid overwrites
                 const safeName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
                 const fileRef = ref(storage, `${_folderPath}/${safeName}`);
                 
@@ -235,9 +205,6 @@
             setTimeout(() => { refreshBothFolders(); }, 1500);
         }
 
-        /* ============================
-           DELETION OPERATIONS
-        ============================ */
         window.deleteAsset = async function(folderPath, fileName) {
             if(!confirm(`Delete visual asset "${fileName}" from the mobile app?`)) return;
             
@@ -247,7 +214,7 @@
             try {
                 const assetRef = ref(storage, `${folderPath}/${fileName}`);
                 await deleteObject(assetRef);
-                refreshBothFolders(); // Reload everything cleanly
+                refreshBothFolders();
             } catch (error) {
                 console.error("Deletion failed:", error);
                 alert("Failed to securely delete asset.");
@@ -255,9 +222,6 @@
             }
         };
 
-        /* ============================
-           FULLSCREEN IMAGE PREVIEW
-        ============================ */
         const previewModal = document.getElementById('previewModal');
         const previewImage = document.getElementById('previewImage');
         
@@ -275,5 +239,6 @@
         });
 
     </script>
+    <script src="components.js"></script>
 </body>
 </html>

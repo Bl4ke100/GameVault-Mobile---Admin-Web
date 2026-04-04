@@ -29,27 +29,10 @@
 
 <body class="bg-[#0a0a0a] text-white flex h-screen font-sans hidden" id="bodyContent">
 
-    <aside class="w-64 bg-[#1a1a1a] flex flex-col border-r border-[#1f1f1f] z-10 shrink-0">
-        <div class="p-6 text-2xl font-bold text-white tracking-tighter">
-            GAMEVAULT <span class="text-xs text-[#888]">ADMIN</span>
-        </div>
-        <nav class="flex-1 px-4 space-y-2">
-            <a href="dashboard.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-home w-6"></i> Dashboard</a>
-            <a href="games.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-gamepad w-6"></i> Games</a>
-            <a href="users.html" class="flex items-center p-3 bg-white text-black hover:bg-gray-200 border-white text-xs text-center rounded-lg shadow-lg font-bold"><i class="fas fa-users w-6"></i> Users</a>
-            <a href="orders.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-shopping-cart w-6"></i> Orders</a>
-            <a href="reports.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-chart-bar w-6"></i> Reports & Comms</a>
-            <a href="banners.html" class="flex items-center p-3 hover:bg-gray-700 rounded-lg text-[#888] hover:text-white transition"><i class="fas fa-images w-6"></i> Banners Hub</a>
-        </nav>
-        <div class="p-4 border-t border-[#1f1f1f]">
-            <button id="btnLogout" class="w-full text-left p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"><i class="fas fa-sign-out-alt w-6"></i> Logout</button>
-        </div>
-    </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden relative">
-        <header class="h-16 bg-[#1a1a1a] border-b border-[#1f1f1f] flex items-center justify-between px-8 shrink-0">
-            <h2 class="text-xl font-semibold">User Management</h2>
-        </header>
+        <div id="header-container"></div>
+
 
         <section class="p-8 overflow-y-auto flex-1">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -87,7 +70,6 @@
         </section>
     </main>
 
-    <!-- Modal for Viewing User Details -->
     <div id="userModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden backdrop-blur-sm transition-opacity overflow-y-auto py-10">
         <div class="bg-[#1a1a1a] rounded-2xl border border-[#1f1f1f] w-full max-w-lg p-6 shadow-2xl relative my-auto">
             <button id="closeModalBtn" class="absolute top-4 right-4 text-[#888] hover:text-white"><i class="fas fa-times text-xl"></i></button>
@@ -147,13 +129,11 @@
         </div>
     </div>
 
-    <!-- Firebase SDK & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Same Config as other pages
         const firebaseConfig = {
             apiKey: "AIzaSyDfgmqKJHdj3udZiK9ubTuJWGqj9JWIYPI",
             authDomain: "gamevault-ffe65.firebaseapp.com",
@@ -170,7 +150,6 @@
 
         let currentUsersList = [];
 
-        // Protection
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('bodyContent').classList.remove('hidden');
@@ -180,18 +159,15 @@
             }
         });
 
-        // Logout Flow
-        document.getElementById('btnLogout').addEventListener('click', () => {
+        window.firebaseLogout = () => {
             signOut(auth).then(() => window.location.href = "index.html");
-        });
+        };
 
-        // Modal Operations
         const modal = document.getElementById('userModal');
 
         document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.add('hidden'));
         document.getElementById('closeDetailBtn').addEventListener('click', () => modal.classList.add('hidden'));
 
-        // Load Users
         async function loadUsers() {
             try {
                 const querySnapshot = await getDocs(collection(db, "users"));
@@ -199,7 +175,7 @@
 
                 querySnapshot.forEach((doc) => {
                     const user = doc.data();
-                    user.uid = doc.id; // Usually doc.id is same as user.uid
+                    user.uid = doc.id;
                     currentUsersList.push(user);
                 });
 
@@ -210,7 +186,6 @@
             }
         }
 
-        // Search & Sorting Handler
         document.getElementById('searchInput').addEventListener('input', applyFiltersAndSort);
         document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSort);
 
@@ -266,7 +241,6 @@
             });
         }
 
-        // Event Delegation for Table Buttons
         document.getElementById('usersTableBody').addEventListener('click', async (e) => {
             const viewBtn = e.target.closest('.view-btn');
             const deleteBtn = e.target.closest('.delete-btn');
@@ -276,18 +250,15 @@
                 const tUser = currentUsersList.find(u => u.uid === rId);
                 
                 if (tUser) {
-                    // Reset View Elements
                     document.getElementById('viewUserAvatar').classList.add('hidden');
                     document.getElementById('viewUserInitials').classList.add('hidden');
                     document.getElementById('userStatsGrid').classList.add('hidden');
                     document.getElementById('userStatsLoading').classList.remove('hidden');
 
-                    // Set Base Info
                     if (tUser.profilePicUrl) {
                         const img = document.getElementById('viewUserAvatar');
                         img.src = tUser.profilePicUrl;
                         
-                        // If image fails to load, fallback magically to initials
                         img.onerror = () => {
                             img.classList.add('hidden');
                             showInitialsFallback(tUser);
@@ -309,7 +280,6 @@
                     
                     modal.classList.remove('hidden');
 
-                    // Fetch Stats Async from subcollections
                     try {
                         const libSnap = await getDocs(collection(db, "users", tUser.uid, "library"));
                         const favSnap = await getDocs(collection(db, "users", tUser.uid, "favorites"));
@@ -355,5 +325,6 @@
             init.classList.remove('hidden');
         }
     </script>
+    <script src="components.js"></script>
 </body>
 </html>
