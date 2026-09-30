@@ -97,15 +97,12 @@ function renderHeader() {
     const title = pageTitles[currentPage] || 'Admin Console';
 
     const actions = document.getElementById('header-actions');
-    const actionsHTML = actions ? actions.innerHTML : '';
-    if (actions) actions.remove(); // Clean up the placeholder
 
     headerContainer.innerHTML = `
     <header class="h-14 bg-[#0a0a0a] border-b border-[#1f1f1f] flex items-center justify-between px-8 shrink-0">
         <div class="flex items-center gap-6">
             <h2 class="text-sm font-bold tracking-widest uppercase text-[#888]">${title}</h2>
-            <div class="flex items-center gap-2">
-                ${actionsHTML}
+            <div class="flex items-center gap-2" id="header-actions-container">
             </div>
         </div>
         <div class="flex items-center gap-3">
@@ -117,6 +114,14 @@ function renderHeader() {
         </div>
     </header>
     `;
+
+    if (actions) {
+        const container = document.getElementById('header-actions-container');
+        while (actions.firstChild) {
+            container.appendChild(actions.firstChild);
+        }
+        actions.remove();
+    }
 }
 
 function setupLogout() {
