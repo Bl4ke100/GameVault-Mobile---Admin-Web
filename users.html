@@ -222,7 +222,7 @@
 
             usersArray.forEach(user => {
                 const picHtml = user.profilePicUrl 
-                    ? `<img src="${user.profilePicUrl}" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-[#1f1f1f] mx-auto" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'User')}&background=random'">`
+                    ? `<img src="https://firebasestorage.googleapis.com/v0/b/gamevault-ffe65.firebasestorage.app/o/images%2Fprofile-images%2F${user.profilePicUrl}?alt=media" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-[#1f1f1f] mx-auto" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'User')}&background=random'">`
                     : `<div class="w-10 h-10 rounded-full bg-gray-700 border-2 border-[#2a2a2a] flex items-center justify-center mx-auto text-xs font-bold">${(user.username || 'U').charAt(0).toUpperCase()}</div>`;
 
                 const tr = document.createElement('tr');
@@ -257,7 +257,7 @@
 
                     if (tUser.profilePicUrl) {
                         const img = document.getElementById('viewUserAvatar');
-                        img.src = tUser.profilePicUrl;
+                        img.src = `https://firebasestorage.googleapis.com/v0/b/gamevault-ffe65.firebasestorage.app/o/images%2Fprofile-images%2F${tUser.profilePicUrl}?alt=media`;
                         
                         img.onerror = () => {
                             img.classList.add('hidden');

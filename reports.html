@@ -333,6 +333,10 @@
                     document.getElementById('rTitle').innerText = "Store Inventory Status";
                     document.getElementById('rTimestamp').innerText = new Date().toLocaleString();
 
+                    const catSnap = await getDocs(collection(db, "categories"));
+                    const catMap = {};
+                    catSnap.forEach(d => { catMap[d.id] = d.data().name || 'Unknown Category'; });
+
                     const gamesSnap = await getDocs(collection(db, "games"));
                     let totalStock = 0;
                     let count = 0;
@@ -342,7 +346,18 @@
                         const g = d.data();
                         totalStock += (g.stock || 0);
                         count++;
-                        rows.push(`<tr><td class="p-3 font-bold text-white">${g.title || ''}</td><td class="p-3">${g.category || ''}</td><td class="p-3">${g.platforms ? g.platforms.join(',') : ''}</td><td class="p-3 text-right text-[#fff] font-bold font-bold">${g.stock || 0}</td><td class="p-3 text-right">Rs ${(g.price || 0).toLocaleString()}</td></tr>`);
+                        
+                        const catName = catMap[g.categoryId] || 'Unknown Category';
+                        
+                        let platformsStr = 'N/A';
+                        if (g.attributes && Array.isArray(g.attributes)) {
+                            const pAttr = g.attributes.find(a => a && a.name && a.name.toLowerCase() === 'platform');
+                            if (pAttr && pAttr.values && Array.isArray(pAttr.values)) {
+                                platformsStr = pAttr.values.join(', ');
+                            }
+                        }
+
+                        rows.push(`<tr><td class="p-3 font-bold text-white">${g.title || ''}</td><td class="p-3">${catName}</td><td class="p-3">${platformsStr}</td><td class="p-3 text-right text-[#fff] font-bold font-bold">${g.stock || 0}</td><td class="p-3 text-right">Rs ${(g.price || 0).toLocaleString()}</td></tr>`);
                     });
 
                     rMetrics.innerHTML = `
