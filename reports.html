@@ -85,7 +85,7 @@
                                 class="block text-xs font-bold text-[#888] uppercase tracking-wider mb-2">Notification
                                 Title</label>
                             <input type="text" id="pushTitle" required
-                                class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg px-4 py-3 focus:border-purple-500 text-white shadow-sm outline-none">
+                                class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg px-4 py-3 focus:border-white text-white shadow-sm outline-none">
                         </div>
 
                         <div>
@@ -93,21 +93,21 @@
                                 class="block text-xs font-bold text-[#888] uppercase tracking-wider mb-2">Notification
                                 Body</label>
                             <textarea id="pushBody" rows="3" required
-                                class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg px-4 py-3 focus:border-purple-500 text-white shadow-sm outline-none resize-none"></textarea>
+                                class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg px-4 py-3 focus:border-white text-white shadow-sm outline-none resize-none"></textarea>
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-[#888] uppercase tracking-wider mb-2">Target
                                 Audience</label>
                             <select id="pushTarget"
-                                class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg px-4 py-3 focus:border-purple-500 text-white shadow-sm outline-none">
+                                class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg px-4 py-3 focus:border-white text-white shadow-sm outline-none">
                                 <option value="all">Broadcast to All Users</option>
                                 <option value="testers">Internal Admins Only</option>
                             </select>
                         </div>
 
                         <button type="submit" id="btnSendPush"
-                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-purple-500/20 transition flex justify-center items-center">
+                            class="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-white/20 transition flex justify-center items-center">
                             <i class="fas fa-rocket mr-2"></i> Deploy Notification
                         </button>
 
@@ -366,7 +366,7 @@
                     });
 
                     rMetrics.innerHTML = `
-                        <div><p class="text-[10px] text-[#555] uppercase font-bold tracking-wider">Total Audited Users</p><p class="text-2xl font-bold text-purple-400">${rows.length}</p></div>
+                        <div><p class="text-[10px] text-[#555] uppercase font-bold tracking-wider">Total Audited Users</p><p class="text-2xl font-bold text-white">${rows.length}</p></div>
                     `;
 
                     tHead.innerHTML = `<tr><th class="p-3">Username</th><th class="p-3">Email Address</th><th class="p-3">Phone</th><th class="p-3">Location Context</th></tr>`;
